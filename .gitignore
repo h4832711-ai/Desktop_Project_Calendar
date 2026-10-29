@@ -1,0 +1,27 @@
+
+# Java compiled files
+*.class
+
+# Java build folders
+bin/
+build/
+out/
+target/
+
+# Saved reminder data
+*.ser
+
+# IDE settings
+.vs/
+.vscode/
+.idea/
+*.iml
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+*.bak
