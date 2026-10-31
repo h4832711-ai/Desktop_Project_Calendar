@@ -23,6 +23,7 @@ public interface IReminderView extends Observer
 	public void setInputFileName(String newFileName);
 	public void setDayList(ArrayList<Integer> days);
 	public void setReminderInputText(String newText);
+	public void setReminderCount(int count);
 	
 	// GUI general operations:
 	public void displayErrorMessage(String message);
@@ -36,5 +37,6 @@ public interface IReminderView extends Observer
 	public void addImportListener(ActionListener loadHandler);
 	public void addSelectTextListener(ActionListener SelectTextHandler);
 	public void addClearListener(ActionListener clearActionListener);
+	public void addDeleteListener(ActionListener deleteActionListener);
 	public void addFileNameListener(ActionListener fileNameHandler);
 }

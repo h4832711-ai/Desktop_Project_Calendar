@@ -16,6 +16,7 @@ public interface IReminderModel
 	// Getters: 
 	public Date getCurrentDate();
 	public String getReminder(Date date);
+	public int getReminderCount();
 	public String getFileName();
 	public Hashtable<Date, String> getCalendar();
 	public ArrayList<Integer> getYears();
@@ -26,6 +27,7 @@ public interface IReminderModel
 	public void setCalendar(Hashtable<Date, String> databaseCalendar);
 	public void setFileName(String fileName);
 	public void setReminder (Date date, String text);
+	public boolean deleteReminder(Date date);
 	
 	// I/O Interface: 
 	public void WriteCalendarToDatabase() throws IOException;

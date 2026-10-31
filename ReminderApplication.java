@@ -5,17 +5,23 @@ import reminderView.ReminderView;
 
 public class ReminderApplication
 {
-	public static void main (String[] args)
-	{		
-		// Create model & view: 
-		ReminderModel model = new ReminderModel();
-		ReminderView view = new ReminderView(model);
-		
-		// Create controller for model & view: 
-		ReminderController<ReminderModel, ReminderView> controller;
-		controller = new ReminderController<ReminderModel, ReminderView>(model, view);
-		
-		// Initiate application: 
-		controller.initializeApplication();
-	}
+    public static void main(String[] args)
+    {
+        // Get the single Model instance - Singleton
+        ReminderModel model = ReminderModel.getInstance();
+
+        // Create the View
+        ReminderView view = new ReminderView(model);
+
+        // Create the Controller
+        ReminderController<ReminderModel, ReminderView> controller;
+
+        controller = new ReminderController<ReminderModel, ReminderView>(
+            model,
+            view
+        );
+
+        // Initialize application
+        controller.initializeApplication();
+    }
 }
