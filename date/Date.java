@@ -3,7 +3,8 @@ package date;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Date implements Serializable, Comparable<Date>
+
+public  final class Date implements Serializable, Comparable<Date>
 {
 	/**
 	 * Utility Class that represents a date by day, month & year.
@@ -16,17 +17,31 @@ public class Date implements Serializable, Comparable<Date>
 	private static final long serialVersionUID = -3524210606929611060L;
 	
 	// Instance Variables 
-	private int day;
-	private int month;
-	private int year;
+	private final int day;
+    private final int month;
+    private final int year;
 	
-	// Customized Constructor: 
-	public Date(int day, int month, int year)
-	{
-		this.day = day;
-		this.month = month;
-		this.year = year;
-	}
+/*
+ * Abstraction Function (AF):
+ * AF(c) = the calendar date represented by c.day, c.month, and c.year.
+ *
+ * Representation Invariant (RI):
+ * 1. year > 0
+ * 2. 1 <= month <= 12
+ * 3. 1 <= day <= maxDayOfMonthAndYear(year, month)
+ *
+ * The constructor enforces the RI by using LocalDate.
+ */
+
+	// Customized Constructor:
+public Date(int day, int month, int year)
+{
+    LocalDate validatedDate = LocalDate.of(year, month, day);
+
+    this.day = validatedDate.getDayOfMonth();
+    this.month = validatedDate.getMonthValue();
+    this.year = validatedDate.getYear();
+}
 	
 	// No argument Constructor:
 	public Date()
@@ -42,20 +57,14 @@ public class Date implements Serializable, Comparable<Date>
 	public int getMonth() {return month;}
 	public int getYear() {return year;}
 
-	// Setters: 
-	public void setDay(int day) {this.day = day;}
-	public void setMonth(int month) {this.month = month;}
-	public void setYear(int year) {this.year = year;}
+	
 
-	// Generate hashCode for this object's date value: 
-	@Override
-	public int hashCode() 
-	{
-		int hashCode;
-		String hashFunction = String.format("%d%d%d", day, month, year);
-		hashCode = Integer.parseInt(hashFunction);
-		return hashCode;
-	}
+	// Generates a hash code based on the date values.
+     @Override
+     public int hashCode()
+    {
+    return java.util.Objects.hash(day, month, year);
+    }
 
 	// Check equation of two dates
 	@Override

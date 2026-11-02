@@ -54,6 +54,8 @@ public class ReminderView extends JFrame implements IReminderView, Observer
     private JButton importButton;
     private JButton clearTextButton;
     private JButton deleteButton;
+    private JButton importantButton;
+    private JButton exportButton;
 
     private final JTextArea reminderText;
     private final JTextField fileName;
@@ -307,6 +309,17 @@ public class ReminderView extends JFrame implements IReminderView, Observer
         );
         controllsPanel.add(deleteButton);
 
+        // Important button - Student 3
+        importantButton = new JButton("Important");
+        importantButton.setToolTipText(
+            "Mark or unmark reminder as important"
+        );
+        controllsPanel.add(importantButton);
+
+        exportButton = new JButton("Export TXT");
+        exportButton.setToolTipText("Export reminders to a TXT file");
+        controllsPanel.add(exportButton);
+
         eastPanel.add(controllsPanel);
         this.add(centerPanel, BorderLayout.CENTER);
 
@@ -387,6 +400,7 @@ southPanel.add(reminderCountLabel, BorderLayout.NORTH);
         importButton.addActionListener(importHandler);
     }
 
+
     @Override
     public void addClearListener(ActionListener clearActionListener)
     {
@@ -402,6 +416,20 @@ southPanel.add(reminderCountLabel, BorderLayout.NORTH);
         deleteButton.addActionListener(
             deleteActionListener
         );
+    }
+    // Important Listener - Student 3
+    @Override
+    public void addImportantListener(ActionListener importantActionListener)
+    {
+        importantButton.addActionListener(
+             importantActionListener
+        );
+    }
+    // Adds an action listener to the Export TXT button.
+    @Override
+    public void addExportListener(ActionListener exportActionListener)
+    {
+    exportButton.addActionListener(exportActionListener);
     }
 
     @Override

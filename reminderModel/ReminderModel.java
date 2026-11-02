@@ -18,6 +18,8 @@ import javax.swing.JFileChooser;
 import date.Date;
 import reminderAPI.IReminderModel;
 
+import java.io.PrintWriter;
+
 public class ReminderModel extends Observable
         implements IReminderModel, Serializable
 {
@@ -36,14 +38,16 @@ public class ReminderModel extends Observable
     // Instance variables
     private Hashtable<Date, String> calendar;
     private String fileName;
+    private Hashtable<Date, Boolean> importantReminders;
 
     // Private constructor for Singleton
-    private ReminderModel()
-    {
-        super();
-        calendar = new Hashtable<Date, String>();
-        fileName = "calendar.ser";
-    }
+   private ReminderModel()
+{
+    super();
+    calendar = new Hashtable<Date, String>();
+    importantReminders = new Hashtable<Date, Boolean>();
+    fileName = "calendar.ser";
+}
 
     // Basic Getters
     @Override
@@ -107,12 +111,28 @@ public class ReminderModel extends Observable
         }
 
         calendar.remove(date);
+        importantReminders.remove(date);
 
         setChanged();
         notifyObservers();
 
         return true;
     }
+    @Override
+public void setImportant(Date date, boolean important)
+{
+    if (date != null && calendar.containsKey(date))
+    {
+        importantReminders.put(date, important);
+        setChanged();
+        notifyObservers();
+    }
+}
+    @Override
+    public boolean isImportant(Date date)
+{
+    return importantReminders.getOrDefault(date, false);
+}
 
     // Get list of years
     @Override
@@ -178,63 +198,101 @@ public class ReminderModel extends Observable
 
     // Save reminders to database file
     @Override
-    public void WriteCalendarToDatabase()
-            throws IOException
+    public void WriteCalendarToDatabase() throws IOException
+{
+    try (ObjectOutputStream outputfile =
+            new ObjectOutputStream(
+                Files.newOutputStream(Paths.get(fileName))
+            ))
     {
-        try (ObjectOutputStream outputfile =
-                new ObjectOutputStream(
-                    Files.newOutputStream(
-                        Paths.get(fileName)
-                    )
-                ))
+        // Save reminders
+        outputfile.writeObject(calendar);
+
+        // Save Important status
+        outputfile.writeObject(importantReminders);
+    }
+}
+    @Override
+public void exportRemindersToTXT() throws IOException
+{
+    try (PrintWriter writer = new PrintWriter(
+            Files.newBufferedWriter(Paths.get("Reminders.txt"))))
+    {
+        for (Date date : calendar.keySet())
         {
-            outputfile.writeObject(calendar);
+            writer.println("Date: " + date);
+            writer.println("Reminder: " + calendar.get(date));
+            writer.println("Important: " + isImportant(date));
+            writer.println("--------------------------------");
         }
     }
+}
 
     // Import reminders from database file
     @Override
     @SuppressWarnings("unchecked")
     public boolean readCalendarFromDatabase()
-            throws IOException, ClassNotFoundException
+        throws IOException, ClassNotFoundException
+{
+    JFileChooser fileChooser = new JFileChooser();
+
+    fileChooser.setFileSelectionMode(
+        JFileChooser.FILES_ONLY
+    );
+
+    if (fileChooser.showOpenDialog(null)
+            != JFileChooser.APPROVE_OPTION)
     {
-        JFileChooser fileChooser = new JFileChooser();
-
-        fileChooser.setFileSelectionMode(
-            JFileChooser.FILES_ONLY
-        );
-
-        if (fileChooser.showOpenDialog(null)
-                != JFileChooser.APPROVE_OPTION)
-        {
-            return false;
-        }
-
-        File inputFile = fileChooser.getSelectedFile();
-
-        try (ObjectInputStream inputStream =
-                new ObjectInputStream(
-                    Files.newInputStream(inputFile.toPath())
-                ))
-        {
-            Object data = inputStream.readObject();
-
-            if (!(data instanceof Hashtable))
-            {
-                throw new ClassNotFoundException(
-                    "Unable to interpret file"
-                );
-            }
-
-            this.calendar =
-                    (Hashtable<Date, String>) data;
-
-            this.fileName = inputFile.getName();
-
-            setChanged();
-            notifyObservers(fileName);
-
-            return true;
-        }
+        return false;
     }
+
+    File inputFile = fileChooser.getSelectedFile();
+
+    try (ObjectInputStream inputStream =
+            new ObjectInputStream(
+                Files.newInputStream(inputFile.toPath())
+            ))
+    {
+        Object data = inputStream.readObject();
+
+        if (!(data instanceof Hashtable))
+        {
+            throw new ClassNotFoundException(
+                "Unable to interpret file"
+            );
+        }
+
+        this.calendar = (Hashtable<Date, String>) data;
+
+        // Read Important status
+        try
+        {
+            Object importantData = inputStream.readObject();
+
+            if (importantData instanceof Hashtable)
+            {
+                this.importantReminders =
+                    (Hashtable<Date, Boolean>) importantData;
+            }
+            else
+            {
+                this.importantReminders =
+                    new Hashtable<Date, Boolean>();
+            }
+        }
+        catch (java.io.EOFException e)
+        {
+            // Support old files that contain reminders only
+            this.importantReminders =
+                new Hashtable<Date, Boolean>();
+        }
+
+        this.fileName = inputFile.getName();
+
+        setChanged();
+        notifyObservers(fileName);
+
+        return true;
+    }
+}
 }

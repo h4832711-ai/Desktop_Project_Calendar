@@ -55,6 +55,9 @@ public class ReminderController<M extends Observable & IReminderModel,
         view.addSaveListener(new SaveHandler());
         view.addImportListener(new ImportHandler());
         view.addClearListener(new ClearTextHandler());
+        view.addImportantListener(new ImportantHandler());
+        // Connects the Export TXT button to its handler.
+        view.addExportListener(new ExportHandler());
 
         // Delete - Student 1
         view.addDeleteListener(new DeleteHandler());
@@ -212,6 +215,48 @@ public class ReminderController<M extends Observable & IReminderModel,
             view.setReminderInputText(null);
         }
     }
+
+// Important Reminder - Student 3
+private class ImportantHandler implements ActionListener
+{
+    @Override
+    public void actionPerformed(ActionEvent event)
+    {
+        boolean newStatus =
+            !model.isImportant(view.getInputDate());
+
+        model.setImportant(
+            view.getInputDate(),
+            newStatus
+        );
+
+        if (newStatus)
+        {
+            view.setStatusBar("Reminder marked as important!");
+        }
+        else
+        {
+            view.setStatusBar("Reminder is no longer important!");
+        }
+    }
+}
+    // Handles exporting reminders to a TXT file.
+ private class ExportHandler implements ActionListener
+{
+    @Override
+    public void actionPerformed(ActionEvent e)
+    {
+        try
+        {
+            model.exportRemindersToTXT();
+            view.setStatusBar("Reminders exported successfully to Reminders.txt");
+        }
+        catch (IOException ex)
+        {
+            view.setStatusBar("Error exporting reminders: " + ex.getMessage());
+        }
+    }
+}
 
     // Delete Reminder - Student 1
     private class DeleteHandler implements ActionListener

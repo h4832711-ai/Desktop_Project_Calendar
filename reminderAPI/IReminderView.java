@@ -38,5 +38,7 @@ public interface IReminderView extends Observer
 	public void addSelectTextListener(ActionListener SelectTextHandler);
 	public void addClearListener(ActionListener clearActionListener);
 	public void addDeleteListener(ActionListener deleteActionListener);
+	public void addImportantListener(ActionListener importantActionListener);
 	public void addFileNameListener(ActionListener fileNameHandler);
+	public void addExportListener(ActionListener exportActionListener);
 }
