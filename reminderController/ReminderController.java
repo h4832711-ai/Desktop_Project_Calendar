@@ -5,12 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
 import java.io.IOException;
-
 import java.util.Observable;
 import java.util.Observer;
-
 import reminderAPI.IReminderController;
 import reminderAPI.IReminderModel;
 import reminderAPI.IReminderView;
@@ -19,26 +16,27 @@ public class ReminderController<M extends Observable & IReminderModel,
                                 V extends Observer & IReminderView>
         implements IReminderController
 {
-    // Utility enumerations:
-    public static enum comboBoxType {
+    // Utility enumerations
+    public static enum comboBoxType
+    {
         YEAR, MONTH, DAY
     };
 
-    // Instance variables:
+    // Instance variables
     private M model;
     private V view;
 
-    // Constructor:
+    // Constructor
     public ReminderController(M model, V view)
     {
-        // Register model and view in the controller:
+        // Register model and view in the controller
         this.model = model;
         this.view = view;
 
-        // Register view as an observer of the model:
+        // Register view as an observer of the model
         model.addObserver(view);
 
-        // Register event handlers for view:
+        // Register event handlers for view
         view.addDayListener(
             new comboBoxListener(comboBoxType.DAY)
         );
@@ -56,6 +54,7 @@ public class ReminderController<M extends Observable & IReminderModel,
         view.addImportListener(new ImportHandler());
         view.addClearListener(new ClearTextHandler());
         view.addImportantListener(new ImportantHandler());
+
         // Connects the Export TXT button to its handler.
         view.addExportListener(new ExportHandler());
 
@@ -63,6 +62,14 @@ public class ReminderController<M extends Observable & IReminderModel,
         view.addDeleteListener(new DeleteHandler());
 
         view.addFileNameListener(new fileNameHandler());
+
+        // FR-03: Search Reminders - Student 2
+        // Connects the keyword search button to SearchHandler.
+        view.addSearchListener(new SearchHandler());
+
+        // FR-04: View All Reminders - Student 2
+        // Connects the View All button to its event handler.
+        view.addViewAllListener(new ViewAllHandler());
     }
 
     // Set default data and initialize GUI
@@ -216,47 +223,57 @@ public class ReminderController<M extends Observable & IReminderModel,
         }
     }
 
-// Important Reminder - Student 3
-private class ImportantHandler implements ActionListener
-{
-    @Override
-    public void actionPerformed(ActionEvent event)
+    // Important Reminder - Student 3
+    private class ImportantHandler implements ActionListener
     {
-        boolean newStatus =
-            !model.isImportant(view.getInputDate());
-
-        model.setImportant(
-            view.getInputDate(),
-            newStatus
-        );
-
-        if (newStatus)
+        @Override
+        public void actionPerformed(ActionEvent event)
         {
-            view.setStatusBar("Reminder marked as important!");
-        }
-        else
-        {
-            view.setStatusBar("Reminder is no longer important!");
+            boolean newStatus =
+                !model.isImportant(view.getInputDate());
+
+            model.setImportant(
+                view.getInputDate(),
+                newStatus
+            );
+
+            if (newStatus)
+            {
+                view.setStatusBar(
+                    "Reminder marked as important!"
+                );
+            }
+            else
+            {
+                view.setStatusBar(
+                    "Reminder is no longer important!"
+                );
+            }
         }
     }
-}
+
     // Handles exporting reminders to a TXT file.
- private class ExportHandler implements ActionListener
-{
-    @Override
-    public void actionPerformed(ActionEvent e)
+    private class ExportHandler implements ActionListener
     {
-        try
+        @Override
+        public void actionPerformed(ActionEvent event)
         {
-            model.exportRemindersToTXT();
-            view.setStatusBar("Reminders exported successfully to Reminders.txt");
-        }
-        catch (IOException ex)
-        {
-            view.setStatusBar("Error exporting reminders: " + ex.getMessage());
+            try
+            {
+                model.exportRemindersToTXT();
+
+                view.setStatusBar(
+                    "Reminders exported successfully to Reminders.txt"
+                );
+            }
+            catch (IOException ex)
+            {
+                view.setStatusBar(
+                    "Error exporting reminders: " + ex.getMessage()
+                );
+            }
         }
     }
-}
 
     // Delete Reminder - Student 1
     private class DeleteHandler implements ActionListener
@@ -360,6 +377,50 @@ private class ImportantHandler implements ActionListener
 
                 view.setReminderInputText(null);
             }
+        }
+    }
+
+    // FR-03: Search Reminders - Student 2
+    // Handles keyword search requests from the View.
+    // Calls the Model to find matching reminders and
+    // sends the results back to the View for display.
+    private class SearchHandler implements ActionListener
+    {
+        @Override
+        public void actionPerformed(ActionEvent event)
+        {
+            String keyword = view.getSearchKeyword();
+
+            // FR-03: Search Reminders - Student 2
+            // Prevent searching with an empty keyword.
+            if (keyword == null || keyword.trim().isEmpty())
+            {
+                view.displayErrorMessage(
+                    "Please enter a keyword to search."
+                );
+                return;
+            }
+
+            // FR-03: Search Reminders - Student 2
+            // Retrieve matching reminders and display them.
+            view.showSearchResults(
+                model.searchReminders(keyword)
+            );
+        }
+    }
+
+    // FR-04: View All Reminders - Student 2
+    // Handles the View All button click.
+    // Retrieves all saved reminders from the Model
+    // and sends them to the View for display.
+    private class ViewAllHandler implements ActionListener
+    {
+        @Override
+        public void actionPerformed(ActionEvent event)
+        {
+            view.showAllReminders(
+                model.getAllReminders()
+            );
         }
     }
 }
